@@ -32,6 +32,9 @@ def encontrar_posicao_inicial():
 player_x, player_y = encontrar_posicao_inicial()
 player = Protagonista(player_x, player_y)
 
+vidas = 3
+posicao_inicial_x, posicao_inicial_y = player_x, player_y
+
 # Inicialização do perseguidor
 perseguidor = Perseguidor(170, 200)  # Agora é um único objeto, não uma lista
 
@@ -64,7 +67,7 @@ for y in range(len(LABIRINTO)):
             spawn_manager.adicionar_local_moeda(pos_x, pos_y)  # x,y correto
         elif LABIRINTO[y][x] == 3:
             monitores.append(Monitor(pos_x, pos_y))
-            spanwmanager.adicionar_local_monitor(pos_x, pos_y)  # x,y correto
+            spawn_manager.adicionar_local_monitor(pos_x, pos_y)  # x,y correto
             
 pontos = 0
 relogio = pygame.time.Clock()
@@ -73,6 +76,36 @@ cacada = True
 jogador_direcao = (0, 0)  
 
 while cacada:
+    if perseguidor.verificar_colisao(player):
+        vidas -= 1
+        #cacada = False
+        
+        if vidas > 0:
+            # Volta para posição inicial
+            player.x, player.y = posicao_inicial_x, posicao_inicial_y
+            perseguidor.x, perseguidor.y = 170, 200  # Reseta posição do perseguidor
+            
+            # Mostra mensagem de vida perdida
+            fonte = pygame.font.SysFont(None, 36)
+            texto_vida = fonte.render(f"Vidas restantes: {vidas}", True, (255, 0, 0))
+            tela.blit(texto_vida, (10, 10))
+            pygame.display.flip()
+            pygame.time.wait(1000)  # Pequena pausa para feedback
+        else:
+            # Game Over
+            tela.fill(PRETO)
+            fonte = pygame.font.SysFont(None, 72)
+            texto = fonte.render("GAME OVER", True, (255, 0, 0))
+            tela.blit(texto, (LARGURA//2 - texto.get_width()//2, ALTURA//2 - texto.get_height()//2))
+            
+            fonte = pygame.font.SysFont(None, 36)
+            texto_pontos = fonte.render(f"Pontuação final: {pontos}", True, BRANCO)
+            tela.blit(texto_pontos, (LARGURA//2 - texto_pontos.get_width()//2, ALTURA//2 + 50))
+            
+            pygame.display.flip()
+            pygame.time.wait(3000)
+            cacada = False
+
     for evento in pygame.event.get():
         if evento.type == pygame.QUIT:
             cacada = False
